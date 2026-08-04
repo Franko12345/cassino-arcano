@@ -27,6 +27,7 @@ docs/research.md    pesquisa principal, fontes e decisões
 docs/balatro-design-synthesis.md  análise aprofundada de sistemas
 docs/game-feel-juice.md          spec aprofundada de feedback e acessibilidade
 docs/responsible-design.md       regulação, psicologia e guardrails
+docs/research-js-frameworks.md   comparação de stack e gatilhos de migração
 CONTEXT.md           contexto canônico para manutenção
 ```
 

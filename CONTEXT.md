@@ -59,4 +59,4 @@ Runs usam metas simples e números concentrados no início. Talismãs devem abri
 - browser: console limpo, fluxo completo, mobile 360 px, reduced motion;
 - relatório final PASS/FAIL com escopo.
 
-Leia `docs/research.md` para decisões e fontes; `docs/balatro-design-synthesis.md`, `docs/game-feel-juice.md` e `docs/responsible-design.md` preservam as pesquisas aprofundadas.
+Leia `docs/research.md` para decisões e fontes; `docs/balatro-design-synthesis.md`, `docs/game-feel-juice.md`, `docs/responsible-design.md` e `docs/research-js-frameworks.md` preservam as pesquisas aprofundadas.
