@@ -23,7 +23,10 @@ shared.css          sistema visual e acessibilidade
 shared.js           áudio, feedback, loja e utilidades comuns
 blackjack/index.html
 roulette/index.html
-docs/research.md    pesquisa, fontes e decisões
+docs/research.md    pesquisa principal, fontes e decisões
+docs/balatro-design-synthesis.md  análise aprofundada de sistemas
+docs/game-feel-juice.md          spec aprofundada de feedback e acessibilidade
+docs/responsible-design.md       regulação, psicologia e guardrails
 CONTEXT.md           contexto canônico para manutenção
 ```
 
