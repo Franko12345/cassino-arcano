@@ -3,7 +3,7 @@
 Dois jogos de cassino single-player transformados em expedições roguelite originais, com créditos exclusivamente virtuais.
 
 - **Vinte & Um:** apostas, metas de lucro, vidas e Talismãs que recompensam estilos diferentes.
-- **Órbita 37:** roleta europeia transparente, apostas combinadas, contratos e builds de recompensa.
+- **Órbita 37:** roleta europeia transparente, apostas combinadas e builds de recompensa.
 - **Game feel:** áudio procedural opcional, feedback sequencial, partículas, shake proporcional e reduced motion.
 - **Sem monetização:** nenhum pagamento, saque, cadastro, anúncio ou autoplay.
 
