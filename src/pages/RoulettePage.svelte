@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ROULETTE_CHIP_OPTIONS, ROULETTE_MAX_ROUNDS, ROULETTE_TARGETS, ACT_COUNT, STARTING_BALANCE, STARTING_LIVES } from '$lib/game/config';
   import { randomNumber, settle, type Bet, type BetType, color, type RouletteColor } from '$lib/game/roulette';
-  import { applyTalismans, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
+  import { applyTalismans, applyModsToBalance, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
   import { SC_REDS } from '$lib/game/roulette-data';
   import RunHud from '$lib/components/RunHud.svelte';
   import TalismanPanel from '$lib/components/TalismanPanel.svelte';
@@ -119,11 +119,7 @@
         weightUsed = true;
       }
     }
-    // Apply modifier multiplier on positive net only (negative keeps stake-based math intact).
-    const baseNet = s.net + bonus;
-    const multiplier = s.net > 0 ? mods.multiplier : 1;
-    const net = multiplier > 1 ? Math.round(baseNet * multiplier) : baseNet;
-    const extra = multiplier > 1 ? net - baseNet : 0;
+    const { net, extra } = applyModsToBalance(mods, s.net);
     balance += s.returned + bonus + extra;
     notes = [`Base ${s.net >= 0 ? '+' : ''}${s.net}`, ...mods.notes];
     const entry: HistoryEntry = {

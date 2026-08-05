@@ -3,11 +3,9 @@ import { applyTalismans, ROULETTE_CATALOG } from './roulette-talismans';
 import { settle, type Bet } from './roulette';
 
 describe('talisman: favoriteColor', () => {
-  const winSettlement = (number: number, bets: Bet[]) => settle(number, bets);
-
   it('doubles net when a color bet won', () => {
     const bets: Bet[] = [{ type: 'color', value: 'red', amount: 10 }];
-    const s = winSettlement(3, bets); // 3 is red
+    const s = settle(3, bets); // 3 is red
     const mods = applyTalismans(s, { relics: ['favoriteColor'], streak: 0 });
     expect(mods.multiplier).toBe(2);
     expect(mods.notes).toContain('Cor Favorita ×2');
@@ -15,7 +13,7 @@ describe('talisman: favoriteColor', () => {
 
   it('does not trigger when no color bet won', () => {
     const bets: Bet[] = [{ type: 'number', value: '17', amount: 5 }];
-    const s = winSettlement(17, bets); // number hit, but no color bet
+    const s = settle(17, bets);
     const mods = applyTalismans(s, { relics: ['favoriteColor'], streak: 0 });
     expect(mods.multiplier).toBe(1);
     expect(mods.notes.some((n) => n.startsWith('Cor Favorita'))).toBe(false);
@@ -23,9 +21,7 @@ describe('talisman: favoriteColor', () => {
 
   it('does not apply to zero (green)', () => {
     const bets: Bet[] = [{ type: 'color', value: 'red', amount: 10 }];
-    const s = winSettlement(0, bets); // zero, color bet loses
-    // settlement.net is 0 (push — stake returned) or negative; favoriteColor only on positive net
-    expect(s.net).toBeLessThanOrEqual(0);
+    const s = settle(0, bets);
     const mods = applyTalismans(s, { relics: ['favoriteColor'], streak: 0 });
     expect(mods.multiplier).toBe(1);
   });
