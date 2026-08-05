@@ -97,12 +97,11 @@ export function parityHotEffect(settlement: Settlement, streak: number): { multi
 }
 
 /** Função pura do Talismã Dúzia Favorita: streak 0 → ×1, 1 → ×1.5, 2 → ×2, 3+ → cap ×3.
- *  `dozenStreak` é a streak ANTES do acerto atual (0 = primeiro acerto).
- *  Progressão: multiplier = min(3, 1 + dozenStreak * 0.5).
+ *  Mapping direto: dozenStreak >= 3 → 3 (cap); senão 1 + dozenStreak * 0.5.
  */
 export function favoriteDozenEffect(settlement: Settlement, dozenStreak: number): { multiplier: number; notes: string[] } {
   if (!settlement.dozenWin || settlement.net <= 0) return { multiplier: 1, notes: [] };
-  const next = Math.min(3, 1 + dozenStreak * 0.5);
+  const next = dozenStreak >= 3 ? 3 : 1 + dozenStreak * 0.5;
   if (next <= 1) return { multiplier: 1, notes: [] };
   return { multiplier: next, notes: [`Dúzia Favorita ×${next}`] };
 }
