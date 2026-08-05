@@ -54,12 +54,14 @@ export interface Settlement {
   readonly types: Set<string>;
   readonly numberWin: boolean;
   readonly dozenWin: boolean;
+  readonly colorWin: boolean;
 }
 
 export function settle(number: number, bets: readonly Bet[]): Settlement {
   let returned = 0;
   let numberWin = false;
   let dozenWin = false;
+  let colorWin = false;
   const types = new Set<string>();
   for (const bet of bets) {
     const pay = odds(bet.type, bet.value, number);
@@ -68,8 +70,9 @@ export function settle(number: number, bets: readonly Bet[]): Settlement {
       types.add(bet.type);
       if (bet.type === 'number') numberWin = true;
       if (bet.type === 'dozen') dozenWin = true;
+      if (bet.type === 'color') colorWin = true;
     }
   }
   const staked = totalStake(bets);
-  return { staked, returned, net: returned - staked, types, numberWin, dozenWin };
+  return { staked, returned, net: returned - staked, types, numberWin, dozenWin, colorWin };
 }

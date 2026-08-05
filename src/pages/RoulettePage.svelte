@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ROULETTE_CHIP_OPTIONS, ROULETTE_MAX_ROUNDS, ROULETTE_TARGETS, ACT_COUNT, STARTING_BALANCE, STARTING_LIVES } from '$lib/game/config';
   import { randomNumber, settle, type Bet, type BetType, color, type RouletteColor } from '$lib/game/roulette';
-  import { applyTalismans, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
+  import { applyTalismans, applyModsToBalance, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
   import { SC_REDS } from '$lib/game/roulette-data';
   import RunHud from '$lib/components/RunHud.svelte';
   import TalismanPanel from '$lib/components/TalismanPanel.svelte';
@@ -108,7 +108,6 @@
   function settle2(number: number) {
     const s = settle(number, betsArr);
     const mods = applyTalismans(s, { relics, streak });
-    let net = s.net + mods.bonus;
     let bonus = mods.bonus;
     if (s.net > 0) {
       streak++;
@@ -120,8 +119,8 @@
         weightUsed = true;
       }
     }
-    balance += s.returned + bonus;
-    net = s.net + bonus;
+    const { net, extra } = applyModsToBalance(mods, s.net);
+    balance += s.returned + bonus + extra;
     notes = [`Base ${s.net >= 0 ? '+' : ''}${s.net}`, ...mods.notes];
     const entry: HistoryEntry = {
       label: `${number} · aposta ${s.staked}`,
