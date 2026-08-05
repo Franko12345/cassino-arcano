@@ -379,7 +379,7 @@
                   {@const r = 78}
                   {@const x = r * Math.cos(rad)}
                   {@const y = r * Math.sin(rad)}
-                  <text x={x.toFixed(2)} y={y.toFixed(2)} text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill={n === 0 ? '#76d5c0' : '#f3ead7'} transform={`rotate(${angle + 90} ${x.toFixed(2)} ${y.toFixed(2)})`}>{n}</text>
+                  <text x={x.toFixed(2)} y={y.toFixed(2)} text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill={n === 0 ? '#76d5c0' : '#f3ead7'}>{n}</text>
                 {/each}
               </g>
             </svg>
