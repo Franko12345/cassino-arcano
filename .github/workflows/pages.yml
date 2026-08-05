@@ -26,6 +26,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run check
+      - run: npm test
       - run: npm run build
       - name: Check static site
         run: python3 scripts/check_site.py
