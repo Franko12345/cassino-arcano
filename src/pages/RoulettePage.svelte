@@ -39,6 +39,7 @@
   let soundOn = $state(getSound());
   let resultNumber = $state<number | null>(null);
   let resultColor = $state<RouletteColor | null>(null);
+  let lastResultNumber = $state<number | null>(null);
   let numberEl: HTMLElement | null = $state(null);
 
   let profit = $derived(balance - actStart);
@@ -70,6 +71,7 @@
     endState = { visible: false, win: false, balance: 0, act: 0 };
     resultNumber = null;
     resultColor = null;
+    lastResultNumber = null;
   }
 
   function betKeyFor(type: BetType, value: string) { return betKey(type, value); }
@@ -151,6 +153,8 @@
     }
     resultNumber = number;
     resultColor = color(number);
+    lastResultNumber = number;
+    setTimeout(() => { lastResultNumber = null; }, 2500);
     message = net > 0
       ? `Lucro líquido de ◆ ${net}.`
       : net === 0
@@ -224,6 +228,39 @@
     chip = v;
     tone(430);
   }
+
+  function betChipColor(amount: number): string {
+    if (amount === 5) return 'var(--chip-5)';
+    if (amount === 10) return 'var(--chip-10)';
+    if (amount === 25) return 'var(--chip-25)';
+    return 'var(--chip-50)';
+  }
+
+  function chipStackFor(betKey: string): number[] {
+    const bet = bets.get(betKey);
+    if (!bet) return [];
+    const totalChips = betsForStack(bet);
+    if (totalChips.length <= 5) return totalChips;
+    return [...totalChips.slice(0, 4), -1];
+  }
+
+  function betsForStack(bet: Bet): number[] {
+    const out: number[] = [];
+    let remaining = bet.amount;
+    for (const denom of [50, 25, 10, 5]) {
+      while (remaining >= denom) {
+        out.push(denom);
+        remaining -= denom;
+      }
+    }
+    return out;
+  }
+
+  // chipStackFor/betsForStack são utilitários para #20 (stack visual).
+  // Renderização inline via class:bet acima é suficiente para a primeira entrega.
+  void chipStackFor;
+  void betsForStack;
+  void betChipColor;
 
   function toggleSound() {
     setSound(!soundOn);
@@ -311,12 +348,21 @@
         <section class="table">
           <p class="eyebrow">Número cheio · 35:1</p>
           <div class="numbers">
-            <button class="number zero" onclick={() => place('number', '0')}>0</button>
+            <button
+              class="number zero"
+              class:bet={bets.get('number:0')?.amount}
+              class:chip-pop={bets.get('number:0')?.amount}
+              class:last-result={lastResultNumber === 0}
+              onclick={() => place('number', '0')}
+            >0</button>
             {#each Array.from({ length: 36 }, (_, i) => i + 1) as n}
               <button
                 class="number"
                 class:red={isRed(n)}
                 class:black={isBlack(n)}
+                class:bet={bets.get(`number:${n}`)?.amount}
+                class:chip-pop={bets.get(`number:${n}`)?.amount}
+                class:last-result={lastResultNumber === n}
                 onclick={() => place('number', String(n))}
                 disabled={spinning}
               >{n}</button>
