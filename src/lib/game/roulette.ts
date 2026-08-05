@@ -70,13 +70,13 @@ const NUMBER_TO_POSITION: ReadonlyMap<number, number> = new Map(
 /**
  * Converte número sorteado (0-36) em ângulo de rotação da roda (0-360).
  * A roda usa a ordem real (não sequencial). Para a casa N parar no topo
- * (ponteiro fixo em 0°), a roda precisa girar de modo que o índice de N
- * no WHEEL_ORDER caia na posição 0.
+ * (ponteiro fixo em 0°), a roda precisa girar clockwise de modo que o
+ * índice de N no WHEEL_ORDER seja trazido ao topo.
  */
 export function numberToAngle(number: number): number {
   const pos = NUMBER_TO_POSITION.get(number);
   if (pos === undefined) return 0;
-  return pos * SLICE;
+  return ((37 - pos) % 37) * SLICE;
 }
 
 export function settle(number: number, bets: readonly Bet[], luckyHouseActive = false): Settlement {
