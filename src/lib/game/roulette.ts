@@ -55,6 +55,7 @@ export interface Settlement {
   readonly numberWin: boolean;
   readonly dozenWin: boolean;
   readonly colorWin: boolean;
+  /** Multiplicador do Casa-Sorte quando ativo e number === 0. Default 1 quando inativo. */
   readonly luckyMultiplier: number;
 }
 

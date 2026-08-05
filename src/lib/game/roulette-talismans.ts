@@ -96,9 +96,7 @@ export function parityHotEffect(settlement: Settlement, streak: number): { multi
   return { multiplier: 3, notes: [`Par/Ímpar de Sorte ×3 (streak ${streak})`] };
 }
 
-/** Função pura do Talismã Dúzia Favorita: streak 0 → ×1, 1 → ×1.5, 2 → ×2, 3+ → cap ×3.
- *  Mapping direto: dozenStreak >= 3 → 3 (cap); senão 1 + dozenStreak * 0.5.
- */
+/** Função pura do Talismã Dúzia Favorita. Ver progressão na spec 0002 §2. */
 export function favoriteDozenEffect(settlement: Settlement, dozenStreak: number): { multiplier: number; notes: string[] } {
   if (!settlement.dozenWin || settlement.net <= 0) return { multiplier: 1, notes: [] };
   const next = dozenStreak >= 3 ? 3 : 1 + dozenStreak * 0.5;

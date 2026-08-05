@@ -2,7 +2,7 @@
  * Efeitos visuais extras: trail da bola, confetti, flash.
  * Todos respeitam `prefers-reduced-motion`.
  */
-import { reducedMotion } from './audio';
+import { reducedMotion, shake } from './audio';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -39,4 +39,14 @@ export function flashNumber(target: HTMLElement | null) {
   void target.offsetWidth;
   target.classList.add('number-flash');
   setTimeout(() => target.classList.remove('number-flash'), 700);
+}
+
+/** Feedback visual para o consumível Casa-Sorte: flash dourado curto + shake leve. */
+export function luckyActivated(target: HTMLElement | null) {
+  if (reducedMotion() || !target || !isBrowser) return;
+  target.classList.remove('lucky-flash');
+  void target.offsetWidth;
+  target.classList.add('lucky-flash');
+  shake(target, false);
+  setTimeout(() => target.classList.remove('lucky-flash'), 800);
 }
