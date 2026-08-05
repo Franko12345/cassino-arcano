@@ -18,7 +18,8 @@ export const ROULETTE_CATALOG: readonly TalismanDef[] = [
   { id: 'trio', name: 'Trinca', text: 'Dúzia vencedora: +15.', cost: 45 },
   { id: 'tide', name: 'Maré', text: 'Vitórias seguidas: +8 por sequência.', cost: 55 },
   { id: 'favoriteColor', name: 'Cor Favorita', text: 'Cor apostada vencedora: líquido ×2.', cost: 50 },
-  { id: 'shortBet', name: 'Aposta Curta', text: 'Total apostado ≤ 10: líquido ×1.5.', cost: 35 }
+  { id: 'shortBet', name: 'Aposta Curta', text: 'Total apostado ≤ 10: líquido ×1.5.', cost: 35 },
+  { id: 'parityHot', name: 'Par/Ímpar de Sorte', text: 'Par/ímpar com streak ≥ 3: líquido ×3.', cost: 40 }
 ] as const;
 
 export interface RouletteMods {
@@ -74,7 +75,19 @@ export function applyTalismans(settlement: Settlement, state: { relics: readonly
     mods.multiplier *= 1.5;
     mods.notes.push('Aposta Curta ×1.5');
   }
+  if (state.relics.includes('parityHot') && state.streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'))) {
+    const effect = parityHotEffect(settlement, state.streak);
+    mods.multiplier *= effect.multiplier;
+    mods.notes.push(...effect.notes);
+  }
   return mods;
+}
+
+/** Função pura do Talismã Par/Ímpar de Sorte (×3 quando streak ≥ 3 e par/ímpar ganha). */
+export function parityHotEffect(settlement: Settlement, streak: number): { multiplier: number; notes: string[] } {
+  const triggered = settlement.net > 0 && streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'));
+  if (!triggered) return { multiplier: 1, notes: [] };
+  return { multiplier: 3, notes: [`Par/Ímpar de Sorte ×3 (streak ${streak})`] };
 }
 
 /**
