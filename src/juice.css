@@ -62,8 +62,23 @@
 }
 .lucky-flash { animation: lucky-flash 0.8s ease-out; }
 
+@keyframes last-result-pulse {
+  0% { box-shadow: 0 0 0 0 rgb(224 184 93 / 0.7); }
+  50% { box-shadow: 0 0 0 6px rgb(224 184 93 / 0.3); }
+  100% { box-shadow: 0 0 0 0 rgb(224 184 93 / 0); }
+}
+.last-result { animation: last-result-pulse 0.6s ease-out 2; outline: 2px solid var(--gold); outline-offset: 2px; }
+
+@keyframes chip-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.chip-pop { animation: chip-pop 0.2s ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   .door, .door:nth-child(2) { animation: none; }
   .card-flip, .chip-press, .number-flash { animation: none; }
   .ball-trail, .confetti-piece { display: none; }
+  .last-result { animation: none; outline: 2px solid var(--gold); }
+  .chip-pop { animation: none; }
 }

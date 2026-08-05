@@ -39,6 +39,7 @@
   let soundOn = $state(getSound());
   let resultNumber = $state<number | null>(null);
   let resultColor = $state<RouletteColor | null>(null);
+  let lastResultNumber = $state<number | null>(null);
   let numberEl: HTMLElement | null = $state(null);
 
   let profit = $derived(balance - actStart);
@@ -70,6 +71,7 @@
     endState = { visible: false, win: false, balance: 0, act: 0 };
     resultNumber = null;
     resultColor = null;
+    lastResultNumber = null;
   }
 
   function betKeyFor(type: BetType, value: string) { return betKey(type, value); }
@@ -151,6 +153,8 @@
     }
     resultNumber = number;
     resultColor = color(number);
+    lastResultNumber = number;
+    setTimeout(() => { lastResultNumber = null; }, 2500);
     message = net > 0
       ? `Lucro líquido de ◆ ${net}.`
       : net === 0
@@ -223,6 +227,33 @@
   function setChip(v: number) {
     chip = v;
     tone(430);
+  }
+
+  function betChipColor(amount: number): string {
+    if (amount === 5) return 'var(--chip-5)';
+    if (amount === 10) return 'var(--chip-10)';
+    if (amount === 25) return 'var(--chip-25)';
+    return 'var(--chip-50)';
+  }
+
+  function chipStackFor(betKey: string): number[] {
+    const bet = bets.get(betKey);
+    if (!bet) return [];
+    const totalChips = betsForStack(bet);
+    if (totalChips.length <= 5) return totalChips;
+    return [...totalChips.slice(0, 4), -1];
+  }
+
+  function betsForStack(bet: Bet): number[] {
+    const out: number[] = [];
+    let remaining = bet.amount;
+    for (const denom of [50, 25, 10, 5]) {
+      while (remaining >= denom) {
+        out.push(denom);
+        remaining -= denom;
+      }
+    }
+    return out;
   }
 
   function toggleSound() {
@@ -311,15 +342,48 @@
         <section class="table">
           <p class="eyebrow">Número cheio · 35:1</p>
           <div class="numbers">
-            <button class="number zero" onclick={() => place('number', '0')}>0</button>
+            <button
+              class="number zero"
+              class:bet={bets.get('number:0')?.amount}
+              class:chip-pop={bets.get('number:0')?.amount}
+              class:last-result={lastResultNumber === 0}
+              onclick={() => place('number', '0')}
+            >0
+              {#if bets.get('number:0')?.amount}
+                <span class="chip-stack">
+                  {#each chipStackFor('number:0') as chip, i}
+                    {#if chip === -1}
+                      <i class="chip-overflow" style="z-index: {i}">+{bets.get('number:0')!.amount - 4 * 50 - 25}</i>
+                    {:else}
+                      <i class="chip" data-value={chip} style="z-index: {i}; background: {betChipColor(chip)}"></i>
+                    {/if}
+                  {/each}
+                </span>
+              {/if}
+            </button>
             {#each Array.from({ length: 36 }, (_, i) => i + 1) as n}
               <button
                 class="number"
                 class:red={isRed(n)}
                 class:black={isBlack(n)}
+                class:bet={bets.get(`number:${n}`)?.amount}
+                class:chip-pop={bets.get(`number:${n}`)?.amount}
+                class:last-result={lastResultNumber === n}
                 onclick={() => place('number', String(n))}
                 disabled={spinning}
-              >{n}</button>
+              >{n}
+                {#if bets.get(`number:${n}`)?.amount}
+                  <span class="chip-stack">
+                    {#each chipStackFor(`number:${n}`) as chip, i}
+                      {#if chip === -1}
+                        <i class="chip-overflow" style="z-index: {i}">+{bets.get(`number:${n}`)!.amount - 4 * 50 - 25}</i>
+                      {:else}
+                        <i class="chip" data-value={chip} style="z-index: {i}; background: {betChipColor(chip)}"></i>
+                      {/if}
+                    {/each}
+                  </span>
+                {/if}
+              </button>
             {/each}
           </div>
           <div class="dozens">
@@ -411,11 +475,14 @@
   .consumable-ready small { display: block; margin-top: 4px; color: var(--muted); font: 400 0.68rem/1.3 system-ui, sans-serif; }
   .consumable-ready button { margin-top: 10px; width: 100%; }
   .empty { color: var(--muted); font: italic 0.78rem Georgia, serif; }
-  .numbers { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
-  .number, .option { position: relative; min-width: 0; padding: 7px 3px; background: var(--ink); color: var(--cream); border: 1px solid var(--line); border-radius: 4px; font: 700 0.8rem system-ui, sans-serif; cursor: pointer; }
+  .numbers { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; position: relative; }
+  .number, .option { position: relative; min-width: 0; padding: 7px 3px; background: var(--ink); color: var(--cream); border: 1px solid var(--line); border-radius: 4px; font: 700 0.8rem system-ui, sans-serif; cursor: pointer; overflow: visible; }
   .number.red, .option.red { background: var(--wine); }
   .number.zero { grid-column: 1 / -1; background: var(--felt-2); border-color: var(--gold); }
   .option:disabled, .number:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chip-stack { position: absolute; top: 2px; right: 2px; display: flex; flex-direction: column-reverse; gap: 1px; align-items: flex-end; pointer-events: none; }
+  .chip-stack .chip { display: block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px dashed rgb(255 255 255 / 0.55); box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
+  .chip-stack .chip-overflow { display: block; min-width: 16px; height: 10px; padding: 0 3px; border-radius: 5px; background: var(--cyan); color: var(--ink); font: 700 0.55rem system-ui, sans-serif; line-height: 10px; text-align: center; box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
   .dozens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 3px; }
   .outside { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 3px; }
   .chips, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 13px; }
