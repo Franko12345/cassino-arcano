@@ -59,6 +59,19 @@ export interface Settlement {
   readonly luckyMultiplier: number;
 }
 
+/** Casa da roda de 37 posições (0-36) ocupa 360/37 ≈ 9.73° cada. */
+const SLICE = 360 / 37;
+
+/**
+ * Converte número sorteado (0-36) em ângulo de rotação da roda (0-360).
+ * Convenção: o ponteiro está fixo no topo da viewport. Para a casa N parar
+ * no topo, a roda precisa girar (37 - N) fatias no sentido horário.
+ * number 0 -> 0° (não roda); number 1 -> 36 fatias; number 18 -> 19 fatias; number 36 -> 1 fatia.
+ */
+export function numberToAngle(number: number): number {
+  return ((37 - number) % 37) * SLICE;
+}
+
 export function settle(number: number, bets: readonly Bet[], luckyHouseActive = false): Settlement {
   let returned = 0;
   let numberWin = false;
