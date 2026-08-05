@@ -1,4 +1,6 @@
 <script lang="ts">
+  import './app.css';
+  import './juice.css';
   import { route, navigate } from '$lib/router';
   import HomePage from '$pages/HomePage.svelte';
   import BlackjackPage from '$pages/BlackjackPage.svelte';
