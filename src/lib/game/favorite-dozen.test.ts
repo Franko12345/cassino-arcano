@@ -3,8 +3,6 @@ import { settle, type Bet } from './roulette';
 import { applyTalismans, favoriteDozenEffect, ROULETTE_CATALOG } from './roulette-talismans';
 
 describe('talisman: favoriteDozen', () => {
-  // Spec §2: streak 0 → ×1, 1 → ×1.5, 2 → ×2, 3+ → ×3 (cap)
-
   it('first dozen hit returns ×1 (no multiplier)', () => {
     const bets: Bet[] = [{ type: 'dozen', value: '1', amount: 10 }];
     const s = settle(5, bets);

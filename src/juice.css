@@ -55,6 +55,13 @@
   100% { opacity: 0; transform: translateY(180px) rotate(540deg); }
 }
 
+@keyframes lucky-flash {
+  0% { box-shadow: 0 0 0 0 rgb(118 213 192 / 0.7); }
+  50% { box-shadow: 0 0 0 14px rgb(118 213 192 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(118 213 192 / 0); }
+}
+.lucky-flash { animation: lucky-flash 0.8s ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   .door, .door:nth-child(2) { animation: none; }
   .card-flip, .chip-press, .number-flash { animation: none; }

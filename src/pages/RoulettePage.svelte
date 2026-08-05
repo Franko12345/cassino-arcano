@@ -10,7 +10,7 @@
   import Shop from '$lib/components/Shop.svelte';
   import Breakdown from '$lib/components/Breakdown.svelte';
   import { tone, celebrate, getSound, setSound } from '$lib/effects/audio';
-  import { ballTrail, flashNumber } from '$lib/effects/juice';
+  import { ballTrail, flashNumber, luckyActivated } from '$lib/effects/juice';
 
   interface HistoryEntry { label: string; value: string }
   interface EndState { visible: boolean; win: boolean; balance: number; act: number }
@@ -130,10 +130,9 @@
     }
     const { net, extra } = applyModsToBalance(mods, s.net);
     balance += s.returned + bonus + extra;
-    if (wasLucky && s.luckyMultiplier > 1) {
+    if (wasLucky && s.luckyMultiplier > 1 && s.net > 0) {
       mods.notes.push(`Casa-Sorte ×${s.luckyMultiplier}`);
     }
-    // Dozen streak: incrementa em dúzia vencedora, zera em qualquer outra resolução.
     if (s.net > 0) {
       if (s.dozenWin) dozenStreak += 1;
       else dozenStreak = 0;
@@ -236,6 +235,8 @@
     if (consumables.luckyHouse === 0 || luckyHouseActive || spinning) return;
     luckyHouseActive = true;
     consumables = { luckyHouse: 0 };
+    const target = document.querySelector('.stage') as HTMLElement | null;
+    luckyActivated(target);
     message = 'Casa-Sorte preparada. Zero paga ×5 e externas pagam 1:1.';
     tone(700, 0.12, 'triangle');
   }
