@@ -115,7 +115,11 @@
     message = 'A órbita está em movimento…';
     const number = randomNumber();
     const jitter = (crypto.getRandomValues(new Uint32Array(1))[0]! % 100) / 100 * 4 - 2;
-    rotation = 2160 + numberToAngle(number) + jitter;
+    const targetAngle = numberToAngle(number) + jitter;
+    const currentMod = ((rotation % 360) + 360) % 360;
+    let delta = (targetAngle - currentMod + 360) % 360;
+    delta += 2160;
+    rotation += delta;
     setTimeout(() => settle2(number), matchReducedMotion() ? 20 : 4200);
   }
 
@@ -390,30 +394,12 @@
         <section class="table">
           <p class="eyebrow">Número cheio · 35:1</p>
           <div class="numbers">
-            <button
-              class="number zero"
-              class:bet={bets.get('number:0')?.amount}
-              class:chip-pop={bets.get('number:0')?.amount}
-              class:last-result={lastResultNumber === 0}
-              onclick={() => place('number', '0')}
-            >0
-              {#if bets.get('number:0')?.amount}
-                <span class="chip-stack">
-                  {#each chipStackFor('number:0') as chip, i}
-                    {#if chip === -1}
-                      <i class="chip-overflow" style="z-index: {i}">+{bets.get('number:0')!.amount - 4 * 50 - 25}</i>
-                    {:else}
-                      <i class="chip" data-value={chip} style="z-index: {i}; background: {betChipColor(chip)}"></i>
-                    {/if}
-                  {/each}
-                </span>
-              {/if}
-            </button>
-            {#each Array.from({ length: 36 }, (_, i) => i + 1) as n}
+            {#each WHEEL_ORDER as n}
               <button
                 class="number"
                 class:red={isRed(n)}
                 class:black={isBlack(n)}
+                class:zero={n === 0}
                 class:bet={bets.get(`number:${n}`)?.amount}
                 class:chip-pop={bets.get(`number:${n}`)?.amount}
                 class:last-result={lastResultNumber === n}
