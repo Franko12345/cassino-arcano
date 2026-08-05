@@ -108,7 +108,6 @@
   function settle2(number: number) {
     const s = settle(number, betsArr);
     const mods = applyTalismans(s, { relics, streak });
-    let net = s.net + mods.bonus;
     let bonus = mods.bonus;
     if (s.net > 0) {
       streak++;
@@ -120,8 +119,12 @@
         weightUsed = true;
       }
     }
-    balance += s.returned + bonus;
-    net = s.net + bonus;
+    // Apply modifier multiplier on positive net only (negative keeps stake-based math intact).
+    const baseNet = s.net + bonus;
+    const multiplier = s.net > 0 ? mods.multiplier : 1;
+    const net = multiplier > 1 ? Math.round(baseNet * multiplier) : baseNet;
+    const extra = multiplier > 1 ? net - baseNet : 0;
+    balance += s.returned + bonus + extra;
     notes = [`Base ${s.net >= 0 ? '+' : ''}${s.net}`, ...mods.notes];
     const entry: HistoryEntry = {
       label: `${number} · aposta ${s.staked}`,

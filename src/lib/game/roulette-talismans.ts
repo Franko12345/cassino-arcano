@@ -16,18 +16,20 @@ export const ROULETTE_CATALOG: readonly TalismanDef[] = [
   { id: 'precision', name: 'Agulha', text: 'Número cheio vencedor: +40.', cost: 60 },
   { id: 'weight', name: 'Contrapeso', text: 'Primeira perda do ato devolve 10.', cost: 40 },
   { id: 'trio', name: 'Trinca', text: 'Dúzia vencedora: +15.', cost: 45 },
-  { id: 'tide', name: 'Maré', text: 'Vitórias seguidas: +8 por sequência.', cost: 55 }
+  { id: 'tide', name: 'Maré', text: 'Vitórias seguidas: +8 por sequência.', cost: 55 },
+  { id: 'favoriteColor', name: 'Cor Favorita', text: 'Cor apostada vencedora: líquido ×2.', cost: 50 }
 ] as const;
 
 export interface RouletteMods {
   bonus: number;
+  multiplier: number;
   notes: string[];
 }
 
-export const NO_MODS: RouletteMods = { bonus: 0, notes: [] };
+export const NO_MODS: RouletteMods = { bonus: 0, multiplier: 1, notes: [] };
 
 export function applyTalismans(settlement: Settlement, state: { relics: readonly string[]; streak: number }): RouletteMods {
-  const mods: RouletteMods = { bonus: 0, notes: [] };
+  const mods: RouletteMods = { bonus: 0, multiplier: 1, notes: [] };
   if (settlement.net <= 0) {
     if (settlement.net < 0 && state.relics.includes('weight')) {
       mods.bonus += 10;
@@ -53,6 +55,10 @@ export function applyTalismans(settlement: Settlement, state: { relics: readonly
       mods.bonus += bonus;
       mods.notes.push(`Maré +${bonus}`);
     }
+  }
+  if (state.relics.includes('favoriteColor') && settlement.colorWin) {
+    mods.multiplier *= 2;
+    mods.notes.push('Cor Favorita ×2');
   }
   return mods;
 }
