@@ -19,7 +19,8 @@ export const ROULETTE_CATALOG: readonly TalismanDef[] = [
   { id: 'tide', name: 'Maré', text: 'Vitórias seguidas: +8 por sequência.', cost: 55 },
   { id: 'favoriteColor', name: 'Cor Favorita', text: 'Cor apostada vencedora: líquido ×2.', cost: 50 },
   { id: 'shortBet', name: 'Aposta Curta', text: 'Total apostado ≤ 10: líquido ×1.5.', cost: 35 },
-  { id: 'parityHot', name: 'Par/Ímpar de Sorte', text: 'Par/ímpar com streak ≥ 3: líquido ×3.', cost: 40 }
+  { id: 'parityHot', name: 'Par/Ímpar de Sorte', text: 'Par/ímpar com streak ≥ 3: líquido ×3.', cost: 40 },
+  { id: 'favoriteDozen', name: 'Dúzia Favorita', text: 'Dúzias seguidas: ×1.5→×3 progressivo.', cost: 45 }
 ] as const;
 
 export interface RouletteMods {
@@ -39,7 +40,7 @@ export const NO_MODS: RouletteMods = { bonus: 0, multiplier: 1, notes: [] };
  *   1. Se s.net <= 0: só bônus fixos (Contrapeso) — sem multiplicador.
  *   2. Se s.net > 0: primeiro bônus fixos, depois multiplicador sobre (net + bonus).
  */
-export function applyTalismans(settlement: Settlement, state: { relics: readonly string[]; streak: number }): RouletteMods {
+export function applyTalismans(settlement: Settlement, state: { relics: readonly string[]; streak: number; dozenStreak?: number }): RouletteMods {
   const mods: RouletteMods = { bonus: 0, multiplier: 1, notes: [] };
   if (settlement.net <= 0) {
     if (settlement.net < 0 && state.relics.includes('weight')) {
@@ -80,6 +81,11 @@ export function applyTalismans(settlement: Settlement, state: { relics: readonly
     mods.multiplier *= effect.multiplier;
     mods.notes.push(...effect.notes);
   }
+  if (state.relics.includes('favoriteDozen')) {
+    const effect = favoriteDozenEffect(settlement, state.dozenStreak ?? 0);
+    mods.multiplier *= effect.multiplier;
+    mods.notes.push(...effect.notes);
+  }
   return mods;
 }
 
@@ -88,6 +94,16 @@ export function parityHotEffect(settlement: Settlement, streak: number): { multi
   const triggered = settlement.net > 0 && streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'));
   if (!triggered) return { multiplier: 1, notes: [] };
   return { multiplier: 3, notes: [`Par/Ímpar de Sorte ×3 (streak ${streak})`] };
+}
+
+/** Função pura do Talismã Dúzia Favorita: streak 0 → ×1, 1 → ×1.5, 2 → ×2, 3+ → cap ×3.
+ *  Mapping direto: dozenStreak >= 3 → 3 (cap); senão 1 + dozenStreak * 0.5.
+ */
+export function favoriteDozenEffect(settlement: Settlement, dozenStreak: number): { multiplier: number; notes: string[] } {
+  if (!settlement.dozenWin || settlement.net <= 0) return { multiplier: 1, notes: [] };
+  const next = dozenStreak >= 3 ? 3 : 1 + dozenStreak * 0.5;
+  if (next <= 1) return { multiplier: 1, notes: [] };
+  return { multiplier: next, notes: [`Dúzia Favorita ×${next}`] };
 }
 
 /**

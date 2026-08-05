@@ -26,6 +26,7 @@
   let rotation = $state(0);
   let relics = $state<string[]>([]);
   let streak = $state(0);
+  let dozenStreak = $state(0);
   let weightUsed = $state(false);
   let message = $state('Escolha uma ficha e monte sua aposta.');
   let notes = $state<string[]>([]);
@@ -55,6 +56,7 @@
     rotation = 0;
     relics = [];
     streak = 0;
+    dozenStreak = 0;
     weightUsed = false;
     message = 'Escolha uma ficha e monte sua aposta.';
     notes = [];
@@ -107,7 +109,7 @@
 
   function settle2(number: number) {
     const s = settle(number, betsArr);
-    const mods = applyTalismans(s, { relics, streak });
+    const mods = applyTalismans(s, { relics, streak, dozenStreak });
     let bonus = mods.bonus;
     if (s.net > 0) {
       streak++;
@@ -121,6 +123,13 @@
     }
     const { net, extra } = applyModsToBalance(mods, s.net);
     balance += s.returned + bonus + extra;
+    // Dozen streak: incrementa em dúzia vencedora, zera em qualquer outra resolução.
+    if (s.net > 0) {
+      if (s.dozenWin) dozenStreak += 1;
+      else dozenStreak = 0;
+    } else {
+      dozenStreak = 0;
+    }
     notes = [`Base ${s.net >= 0 ? '+' : ''}${s.net}`, ...mods.notes];
     const entry: HistoryEntry = {
       label: `${number} · aposta ${s.staked}`,
@@ -166,6 +175,7 @@
       rounds = 0;
       actStart = balance;
       weightUsed = false;
+      dozenStreak = 0;
       streak = 0;
       message = 'O ato falhou. Vida consumida; tente o ato novamente.';
     }
@@ -181,19 +191,21 @@
     rounds = 0;
     actStart = balance;
     weightUsed = false;
+    dozenStreak = 0;
     streak = 0;
     message = 'Novo ato. Monte sua exposição.';
   }
+
   function skipShop() {
     shopOpen = false;
     act++;
     rounds = 0;
     actStart = balance;
     weightUsed = false;
+    dozenStreak = 0;
     streak = 0;
     message = 'Novo ato. Monte sua exposição.';
   }
-
   function setChip(v: number) {
     chip = v;
     tone(430);
