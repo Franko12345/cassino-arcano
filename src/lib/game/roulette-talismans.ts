@@ -76,10 +76,18 @@ export function applyTalismans(settlement: Settlement, state: { relics: readonly
     mods.notes.push('Aposta Curta ×1.5');
   }
   if (state.relics.includes('parityHot') && state.streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'))) {
-    mods.multiplier *= 3;
-    mods.notes.push(`Par/Ímpar de Sorte ×3 (streak ${state.streak})`);
+    const effect = parityHotEffect(settlement, state.streak);
+    mods.multiplier *= effect.multiplier;
+    mods.notes.push(...effect.notes);
   }
   return mods;
+}
+
+/** Função pura do Talismã Par/Ímpar de Sorte (×3 quando streak ≥ 3 e par/ímpar ganha). */
+export function parityHotEffect(settlement: Settlement, streak: number): { multiplier: number; notes: string[] } {
+  const triggered = settlement.net > 0 && streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'));
+  if (!triggered) return { multiplier: 1, notes: [] };
+  return { multiplier: 3, notes: [`Par/Ímpar de Sorte ×3 (streak ${streak})`] };
 }
 
 /**
