@@ -352,7 +352,37 @@
         <section class="wheel-zone">
           <div class="wheel-shell">
             <span class="pointer"></span>
-            <div class="wheel" style="transform: rotate({rotation}deg)"></div>
+            <svg class="wheel" viewBox="-100 -100 200 200" style="transform: rotate({rotation}deg)">
+              <g class="wheel-gradient">
+                {#each Array.from({ length: 37 }, (_, i) => {
+                  const slice = 360 / 37;
+                  const start = -90 + i * slice;
+                  const end = start + slice;
+                  const startRad = (start * Math.PI) / 180;
+                  const endRad = (end * Math.PI) / 180;
+                  const x1 = 100 * Math.cos(startRad);
+                  const y1 = 100 * Math.sin(startRad);
+                  const x2 = 100 * Math.cos(endRad);
+                  const y2 = 100 * Math.sin(endRad);
+                  return { i, x1, y1, x2, y2 };
+                }) as slice}
+                <path d={`M 0 0 L ${slice.x1.toFixed(2)} ${slice.y1.toFixed(2)} A 100 100 0 0 1 ${slice.x2.toFixed(2)} ${slice.y2.toFixed(2)} Z`} fill={slice.i === 0 ? '#062e26' : (SC_REDS.has(slice.i) ? '#972c35' : '#151b19')} stroke="#000" stroke-width="0.5" />
+                {/each}
+              </g>
+              <g class="wheel-numbers">
+                {#each Array.from({ length: 37 }, (_, i) => {
+                  const slice = 360 / 37;
+                  const angle = -90 + i * slice + slice / 2;
+                  const rad = (angle * Math.PI) / 180;
+                  const r = 78;
+                  const x = r * Math.cos(rad);
+                  const y = r * Math.sin(rad);
+                  return { i, angle, x, y };
+                }) as num}
+                <text x={num.x.toFixed(2)} y={num.y.toFixed(2)} text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill={num.i === 0 ? '#76d5c0' : '#f3ead7'} transform={`rotate(${num.angle + 90} ${num.x.toFixed(2)} ${num.y.toFixed(2)})`}>{num.i}</text>
+                {/each}
+              </g>
+            </svg>
           </div>
           <output class="result" bind:this={numberEl} class:number-flash={resultNumber !== null} class:red={resultColor === 'red'} class:black={resultColor === 'black'} class:green={resultColor === 'green'}>
             {resultNumber === null ? '—' : resultNumber}
@@ -484,7 +514,7 @@
   .wheel-zone { display: grid; justify-items: center; gap: 14px; }
   .wheel-shell { position: relative; width: 230px; aspect-ratio: 1; display: grid; place-items: center; }
   .pointer { position: absolute; z-index: 3; top: -7px; border: 12px solid transparent; border-top: 22px solid var(--gold); filter: drop-shadow(0 2px 2px #000); }
-  .wheel { width: 100%; height: 100%; border: 9px solid #826127; border-radius: 50%; background: repeating-conic-gradient(from -4.865deg, #972c35 0 9.73deg, #151b19 9.73deg 19.46deg); box-shadow: 0 0 0 3px var(--gold), 0 15px 35px rgb(0 0 0 / 0.5), inset 0 0 0 8px rgb(255 255 255 / 0.09); transition: transform 2.4s cubic-bezier(0.12, 0.68, 0.16, 1); }
+  .wheel { width: 100%; height: 100%; border: 9px solid #826127; border-radius: 50%; background: #151b19; box-shadow: 0 0 0 3px var(--gold), 0 15px 35px rgb(0 0 0 / 0.5), inset 0 0 0 8px rgb(255 255 255 / 0.09); transition: transform 2.4s cubic-bezier(0.12, 0.68, 0.16, 1); overflow: visible; }
   .wheel::after { content: ""; position: absolute; inset: 42%; border: 4px solid #66481d; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 6px var(--cream); }
   .result { display: grid; place-items: center; width: 54px; height: 54px; border: 2px solid var(--gold); border-radius: 50%; background: var(--felt-2); font: 700 1.7rem system-ui, sans-serif; transition: background 0.3s ease; }
   .result.red { background: var(--wine); }
