@@ -6,7 +6,7 @@
  *  - outras externas: 1:1
  * Sem zeros em apostas externas (mesma regra do cassino físico).
  */
-import { SC_REDS } from './roulette-data';
+import { SC_REDS, WHEEL_ORDER } from './roulette-data';
 
 export type RouletteColor = 'green' | 'red' | 'black';
 export type BetType = 'number' | 'color' | 'even' | 'odd' | 'low' | 'high' | 'dozen';
@@ -62,14 +62,21 @@ export interface Settlement {
 /** Casa da roda de 37 posições (0-36) ocupa 360/37 ≈ 9.73° cada. */
 const SLICE = 360 / 37;
 
+/** Mapa número → índice na ordem da roda europeia real (não-sequencial). */
+const NUMBER_TO_POSITION: ReadonlyMap<number, number> = new Map(
+  WHEEL_ORDER.map((n, i) => [n, i])
+);
+
 /**
  * Converte número sorteado (0-36) em ângulo de rotação da roda (0-360).
- * Convenção: o ponteiro está fixo no topo da viewport. Para a casa N parar
- * no topo, a roda precisa girar (37 - N) fatias no sentido horário.
- * number 0 -> 0° (não roda); number 1 -> 36 fatias; number 18 -> 19 fatias; number 36 -> 1 fatia.
+ * A roda usa a ordem real (não sequencial). Para a casa N parar no topo
+ * (ponteiro fixo em 0°), a roda precisa girar de modo que o índice de N
+ * no WHEEL_ORDER caia na posição 0.
  */
 export function numberToAngle(number: number): number {
-  return ((37 - number) % 37) * SLICE;
+  const pos = NUMBER_TO_POSITION.get(number);
+  if (pos === undefined) return 0;
+  return pos * SLICE;
 }
 
 export function settle(number: number, bets: readonly Bet[], luckyHouseActive = false): Settlement {
