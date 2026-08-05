@@ -1,8 +1,16 @@
 # Stack: HTML/CSS/JS nativo sem framework
 
-- **Status:** Aceito
-- **Data:** 2026-08-04
+- **Status:** Superseded (por Svelte 5 + TypeScript + Vite, 2026-08-04)
+- **Data original:** 2026-08-04
 - **Contexto:** Cassino Arcano (dois jogos roguelite single-player, GitHub Pages, créditos virtuais)
+
+> **Atualização 2026-08-04:** Stack migrou para Svelte 5 + TypeScript + Vite (PR #1).
+> Este ADR permanece como histórico. A nova decisão de stack foi feita por conversa
+> direta entre manter e agente; a comparação técnica de alternativas abaixo continua
+> válida para referência futura (e.g., se um terceiro jogo justificar engine).
+>
+> Status mudado de "Aceito" para "Superseded" para refletir a realidade sem reescrever
+> a numeração do ADR (preserva histórico de decisão).
 
 ## Contexto e problema
 
