@@ -410,9 +410,9 @@
                   <span class="chip-stack">
                     {#each chipStackFor(`number:${n}`) as chip, i}
                       {#if chip === -1}
-                        <i class="chip-overflow" style="z-index: {i}">+{bets.get(`number:${n}`)!.amount - 4 * 50 - 25}</i>
+                        <i class="stack-chip-overflow" style="z-index: {i}">+{bets.get(`number:${n}`)!.amount - 4 * 50 - 25}</i>
                       {:else}
-                        <i class="chip" data-value={chip} style="z-index: {i}; background: {betChipColor(chip)}"></i>
+                        <i class="stack-chip" data-value={chip} style="z-index: {i}; background: {betChipColor(chip)}"></i>
                       {/if}
                     {/each}
                   </span>
@@ -515,8 +515,8 @@
   .number.zero { grid-column: 1 / -1; background: var(--felt-2); border-color: var(--gold); }
   .option:disabled, .number:disabled { opacity: 0.4; cursor: not-allowed; }
   .chip-stack { position: absolute; top: 2px; right: 2px; display: flex; flex-direction: column-reverse; gap: 1px; align-items: flex-end; pointer-events: none; }
-  .chip-stack .chip { display: block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px dashed rgb(255 255 255 / 0.55); box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
-  .chip-stack .chip-overflow { display: block; min-width: 16px; height: 10px; padding: 0 3px; border-radius: 5px; background: var(--cyan); color: var(--ink); font: 700 0.55rem system-ui, sans-serif; line-height: 10px; text-align: center; box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
+  .chip-stack .stack-chip { display: block; width: 11px; height: 11px; flex-shrink: 0; flex-grow: 0; border-radius: 50%; border: 1.5px dashed rgb(255 255 255 / 0.55); box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
+  .chip-stack .stack-chip-overflow { display: block; min-width: 18px; height: 11px; flex-shrink: 0; flex-grow: 0; padding: 0 4px; border-radius: 6px; background: var(--cyan); color: var(--ink); font: 700 0.55rem system-ui, sans-serif; line-height: 11px; text-align: center; box-shadow: 0 0 2px rgb(0 0 0 / 0.5); }
   .dozens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 3px; }
   .outside { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 3px; }
   .chips, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 13px; }
