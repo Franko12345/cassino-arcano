@@ -1,0 +1,73 @@
+<script lang="ts">
+  let innerWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  let single = $derived(innerWidth <= 600);
+</script>
+
+<svelte:window on:resize={() => (innerWidth = window.innerWidth)} />
+
+<main class="salon" class:single>
+  <header>
+    <p>Expedições de sorte administrável</p>
+    <h1>Cassino Arcano</h1>
+  </header>
+  <nav class="doors">
+    <a class="door" data-mark="21" href="#/blackjack">
+      <strong>Vinte & Um</strong>
+      <span>Gerencie apostas, margem de risco e Talismãs através de cinco atos.</span>
+    </a>
+    <a class="door" data-mark="37" href="#/roulette">
+      <strong>Órbita 37</strong>
+      <span>Construa exposição, combine apostas e vença metas sem esconder as probabilidades.</span>
+    </a>
+  </nav>
+  <p class="note">
+    Experiência single-player com créditos exclusivamente virtuais. Sem compras, saques, cadastro ou monetização.
+    Inspirada por princípios de roguelite e game feel — identidade, regras e arte originais.
+  </p>
+</main>
+
+<style>
+  .salon {
+    width: min(100%, 980px);
+    min-height: 100svh;
+    display: grid;
+    place-content: center;
+    gap: 34px;
+    padding: clamp(24px, 6vw, 70px);
+    background: radial-gradient(circle at 50% 38%, #0c4b3b, #05241d 74%);
+    box-shadow: 0 0 70px #000;
+  }
+  header { text-align: center; }
+  header p { color: var(--muted); font: 700 0.75rem system-ui, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+  h1 { margin: 0; color: var(--gold); font-size: clamp(2.2rem, 8vw, 5.4rem); letter-spacing: 0.16em; text-transform: uppercase; }
+  .doors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .door {
+    position: relative;
+    min-height: 260px;
+    overflow: hidden;
+    display: grid;
+    align-content: end;
+    padding: 24px;
+    color: var(--cream);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    background: #082e26;
+    box-shadow: 0 14px 35px rgb(0 0 0 / 0.28);
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+  .door::before {
+    content: attr(data-mark);
+    position: absolute;
+    right: 18px;
+    top: 3px;
+    color: rgb(224 184 93 / 0.16);
+    font: 700 8rem Georgia, serif;
+  }
+  .door:hover { transform: translateY(-5px); border-color: var(--gold); background: #0d3b30; }
+  .door strong { z-index: 1; color: var(--gold); font-size: clamp(1.5rem, 4vw, 2.3rem); letter-spacing: 0.1em; text-transform: uppercase; }
+  .door span { z-index: 1; margin-top: 7px; color: var(--muted); font: 0.8rem/1.45 system-ui, sans-serif; }
+  .note { max-width: 640px; margin: auto; text-align: center; color: var(--muted); font: 0.7rem/1.5 system-ui, sans-serif; }
+  .salon.single .doors { grid-template-columns: 1fr; }
+  .salon.single .door { min-height: 170px; }
+  .salon.single .door::before { font-size: 6rem; }
+</style>

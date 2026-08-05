@@ -1,42 +1,26 @@
 #!/usr/bin/env python3
-"""Minimal static-site check used locally and in CI."""
-from html.parser import HTMLParser
+"""Static-site check for Cassino Arcano (Vite + Svelte).
+
+Verifica que o diretório dist/ foi gerado pelo build. O Vite gera
+um único index.html + assets/, e o roteamento é client-side via hash.
+"""
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = [ROOT / "index.html", ROOT / "blackjack/index.html", ROOT / "roulette/index.html"]
-
-
-class Parser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.refs = []
-        self.title = False
-
-    def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
-        if tag == "title":
-            self.title = True
-        for key in ("href", "src"):
-            value = attrs.get(key, "")
-            if value and not value.startswith(("http:", "https:", "#", "data:")):
-                self.refs.append(value)
-
+DIST = ROOT / "dist"
 
 errors = []
-for page in PAGES:
-    parser = Parser()
-    parser.feed(page.read_text())
-    errors += ([] if parser.title else [f"{page.relative_to(ROOT)}: missing <title>"])
-    for ref in parser.refs:
-        target = (page.parent / ref.split("?", 1)[0]).resolve()
-        if target.is_dir():
-            target /= "index.html"
-        if not target.exists():
-            errors.append(f"{page.relative_to(ROOT)}: broken local ref {ref}")
+required = [DIST / "index.html", DIST / "assets"]
+for path in required:
+    if not path.exists():
+        errors.append(f"missing {path.relative_to(ROOT)}; run `npm run build`")
+
+if not (DIST / "assets").is_dir() or not list((DIST / "assets").iterdir()):
+    errors.append("dist/assets is empty")
 
 if errors:
     print("\n".join(f"FAIL {error}" for error in errors))
     sys.exit(1)
-print(f"PASS {len(PAGES)} pages; all local assets resolve")
+print(f"PASS dist/ build artifacts present ({len(list((DIST / 'assets').iterdir()))} files in dist/assets)")
+

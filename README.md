@@ -1,38 +1,62 @@
 # Cassino Arcano
 
-Dois jogos de cassino single-player transformados em expedições roguelite originais, com créditos exclusivamente virtuais.
+Blackjack e roleta roguelite com créditos virtuais e design responsável.
 
 - **Vinte & Um:** apostas, metas de lucro, vidas e Talismãs que recompensam estilos diferentes.
 - **Órbita 37:** roleta europeia transparente, apostas combinadas e builds de recompensa.
 - **Game feel:** áudio procedural opcional, feedback sequencial, partículas, shake proporcional e reduced motion.
 - **Sem monetização:** nenhum pagamento, saque, cadastro, anúncio ou autoplay.
 
-## Rodar
+## Stack
+
+- Svelte 5 (runes) + TypeScript
+- Vite 5
+- Sem framework de UI, sem engine de canvas, sem servidor
+- Web Audio API para SFX, DOM real para a mesa
+- Deploy em GitHub Pages via `actions/deploy-pages`
+
+## Rodar localmente
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev      # dev server em http://localhost:5173/cassino-arcano/
+npm run build    # gera dist/
+npm run check    # svelte-check (TypeScript + Svelte)
+npm test         # vitest (cobre a lógica pura em src/lib/game/)
 ```
 
-Abra http://localhost:8000.
+O `base: '/cassino-arcano/'` no `vite.config.ts` é necessário porque o projeto é publicado no GitHub Pages sob esse path. Para testar localmente, mantenha esse prefixo na URL.
 
 ## Estrutura
 
 ```text
-index.html          salão e escolha do jogo
-shared.css          sistema visual e acessibilidade
-shared.js           áudio, feedback, loja e utilidades comuns
-blackjack/index.html
-roulette/index.html
-docs/research.md    pesquisa principal, fontes e decisões
-docs/balatro-design-synthesis.md  análise aprofundada de sistemas
-docs/game-feel-juice.md          spec aprofundada de feedback e acessibilidade
-docs/responsible-design.md       regulação, psicologia e guardrails
-docs/research-js-frameworks.md   comparação de stack e gatilhos de migração
-CONTEXT.md           contexto canônico para manutenção
+src/
+├── app.css                    variáveis, animações globais, reduced motion
+├── juice.css                  animações opcionais: card-flip, ball-trail, confetti, number-flash
+├── main.ts                    entry point: mount(App)
+├── main.svelte                shell com roteador por hash
+├── lib/
+│   ├── router.ts              roteador: #/, #/blackjack, #/roulette
+│   ├── components/            Button, RunHud, Shop, TalismanPanel, History, Breakdown
+│   ├── effects/
+│   │   ├── audio.ts           tone(), shake(), burst(), celebrate()
+│   │   └── juice.ts           ball-trail(), confettiBurst(), flashNumber()
+│   └── game/                  lógica pura de jogo (TS, sem DOM)
+│       ├── cards.ts           tipos de carta
+│       ├── deck.ts            embaralhamento Fisher-Yates via crypto
+│       ├── blackjack.ts       score, isNatural, isBust
+│       ├── blackjack-talismans.ts   outcome + Talismãs
+│       ├── roulette.ts        randomNumber, odds, settle
+│       ├── roulette-data.ts   conjunto de vermelhos
+│       ├── roulette-talismans.ts    settlement + Talismãs
+│       └── config.ts          constantes de balanceamento
+├── pages/
+│   ├── HomePage.svelte
+│   ├── BlackjackPage.svelte
+│   └── RoulettePage.svelte
+└── .nojekyll                  garante deploy direto no GitHub Pages
 ```
 
-Sem framework ou build: o escopo cabe em APIs nativas e abre em qualquer servidor estático.
+## Workflow
 
-## Ética e transparência
-
-A roleta usa 37 resultados equiprováveis via `crypto.getRandomValues` com rejection sampling. Talismãs modificam somente recompensas visíveis, nunca o sorteio. Retorno igual à aposta não é celebrado como vitória. Consulte [`docs/research.md`](docs/research.md).
+Issue → spec em `docs/specs/` → branch `feat/<n>-<slug>` → PR com review → merge em `main`. Veja `docs/workflow.md`.
