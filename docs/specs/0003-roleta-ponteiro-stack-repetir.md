@@ -1,7 +1,7 @@
 # Spec: Sincronização roleta + stack visual de fichas + repetição
 
 - **Issue:** #19
-- **Status:** Proposta
+- **Status:** Implementada
 - **Data:** 2026-08-05
 
 ## Contexto
