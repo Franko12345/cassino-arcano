@@ -55,16 +55,24 @@ export interface Settlement {
   readonly numberWin: boolean;
   readonly dozenWin: boolean;
   readonly colorWin: boolean;
+  readonly luckyMultiplier: number;
 }
 
-export function settle(number: number, bets: readonly Bet[]): Settlement {
+export function settle(number: number, bets: readonly Bet[], luckyHouseActive = false): Settlement {
   let returned = 0;
   let numberWin = false;
   let dozenWin = false;
   let colorWin = false;
+  let luckyMultiplier = 1;
   const types = new Set<string>();
   for (const bet of bets) {
-    const pay = odds(bet.type, bet.value, number);
+    let pay = odds(bet.type, bet.value, number);
+    if (luckyHouseActive && number === 0) {
+      // Casa-Sorte: zero paga number:0 em ×5 E aciona externas em 1:1.
+      if (bet.type === 'number') pay = 5;
+      else if (bet.type !== 'dozen' && pay === -1) pay = 1;
+    }
+    if (pay > luckyMultiplier) luckyMultiplier = pay;
     if (pay >= 0) {
       returned += bet.amount * (pay + 1);
       types.add(bet.type);
@@ -74,5 +82,5 @@ export function settle(number: number, bets: readonly Bet[]): Settlement {
     }
   }
   const staked = totalStake(bets);
-  return { staked, returned, net: returned - staked, types, numberWin, dozenWin, colorWin };
+  return { staked, returned, net: returned - staked, types, numberWin, dozenWin, colorWin, luckyMultiplier };
 }

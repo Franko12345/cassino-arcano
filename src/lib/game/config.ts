@@ -16,3 +16,9 @@ export const ROULETTE_MAX_ROUNDS = 6;
 
 export const BLACKJACK_BET_OPTIONS: readonly number[] = [10, 20, 50, 100];
 export const ROULETTE_CHIP_OPTIONS: readonly number[] = [5, 10, 25, 50];
+
+/** Consumível "Casa-Sorte": aparece na loja entre atos com chance LUCKY_HOUSE_CHANCE,
+ *  custo LUCKY_HOUSE_COST. Uso único por ato; some ao final do ato.
+ */
+export const LUCKY_HOUSE_COST = 60;
+export const LUCKY_HOUSE_CHANCE = 0.3;
