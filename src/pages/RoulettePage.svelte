@@ -25,6 +25,8 @@
   let spinning = $state(false);
   let rotation = $state(0);
   let relics = $state<string[]>([]);
+  let consumables = $state<{ luckyHouse: 0 | 1 }>({ luckyHouse: 0 });
+  let luckyHouseActive = $state(false);
   let streak = $state(0);
   let dozenStreak = $state(0);
   let weightUsed = $state(false);
@@ -55,6 +57,8 @@
     spinning = false;
     rotation = 0;
     relics = [];
+    consumables = { luckyHouse: 0 };
+    luckyHouseActive = false;
     streak = 0;
     dozenStreak = 0;
     weightUsed = false;
@@ -108,7 +112,9 @@
   }
 
   function settle2(number: number) {
-    const s = settle(number, betsArr);
+    const s = settle(number, betsArr, luckyHouseActive);
+    const wasLucky = luckyHouseActive;
+    luckyHouseActive = false;
     const mods = applyTalismans(s, { relics, streak, dozenStreak });
     let bonus = mods.bonus;
     if (s.net > 0) {
@@ -123,6 +129,9 @@
     }
     const { net, extra } = applyModsToBalance(mods, s.net);
     balance += s.returned + bonus + extra;
+    if (wasLucky && s.luckyMultiplier > 1) {
+      mods.notes.push(`Casa-Sorte ×${s.luckyMultiplier}`);
+    }
     // Dozen streak: incrementa em dúzia vencedora, zera em qualquer outra resolução.
     if (s.net > 0) {
       if (s.dozenWin) dozenStreak += 1;
@@ -164,6 +173,11 @@
         return;
       }
       shopOpen = true;
+      // Casa-Sorte aparece com 30% de chance na slot central (só se inventário vazio).
+      if (consumables.luckyHouse === 0 && rollLuckyHouse()) {
+        consumables = { luckyHouse: 1 };
+        message = 'A Casa-Sorte apareceu no seu inventário.';
+      }
       return;
     }
     if (rounds >= ROULETTE_MAX_ROUNDS || balance < 5) {
@@ -177,6 +191,8 @@
       weightUsed = false;
       dozenStreak = 0;
       streak = 0;
+      consumables = { luckyHouse: 0 };
+      luckyHouseActive = false;
       message = 'O ato falhou. Vida consumida; tente o ato novamente.';
     }
   }
@@ -193,6 +209,8 @@
     weightUsed = false;
     dozenStreak = 0;
     streak = 0;
+    consumables = { luckyHouse: 0 };
+    luckyHouseActive = false;
     message = 'Novo ato. Monte sua exposição.';
   }
 
@@ -204,6 +222,8 @@
     weightUsed = false;
     dozenStreak = 0;
     streak = 0;
+    consumables = { luckyHouse: 0 };
+    luckyHouseActive = false;
     message = 'Novo ato. Monte sua exposição.';
   }
   function setChip(v: number) {
@@ -214,6 +234,20 @@
   function toggleSound() {
     setSound(!soundOn);
     soundOn = !soundOn;
+  }
+
+  function useLuckyHouse() {
+    if (consumables.luckyHouse === 0 || luckyHouseActive || spinning) return;
+    luckyHouseActive = true;
+    consumables = { luckyHouse: 0 };
+    message = 'Casa-Sorte preparada. Zero paga ×5 e externas pagam 1:1.';
+    tone(700, 0.12, 'triangle');
+  }
+
+  function rollLuckyHouse(): boolean {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0]! / 2 ** 32 < 0.3;
   }
 
   function isRed(n: number): boolean { return SC_REDS.has(n); }
@@ -238,6 +272,20 @@
     <aside class="sidebar">
       <RunHud act={act} actCount={ACT_COUNT} profit={profit} target={targets[act]!} lives={lives} livesMax={STARTING_LIVES} />
       <TalismanPanel relics={relics} catalog={ROULETTE_CATALOG} />
+      <section class="panel consumable-panel">
+        <p class="eyebrow">Consumível</p>
+        {#if consumables.luckyHouse === 1}
+          <div class="consumable-ready">
+            <strong>Casa-Sorte</strong>
+            <small>Zero paga ×5 e externas pagam 1:1.</small>
+            <button class="primary" onclick={useLuckyHouse} disabled={spinning || luckyHouseActive}>
+              {luckyHouseActive ? 'Ativa na próxima rodada' : 'Usar antes de girar'}
+            </button>
+          </div>
+        {:else}
+          <span class="empty">Nenhum.</span>
+        {/if}
+      </section>
       <History history={history} />
     </aside>
 
@@ -344,6 +392,10 @@
   .message { min-height: 1.5em; margin: 8px 0; text-align: center; font: 700 0.9rem system-ui, sans-serif; }
   .table { min-width: 0; }
   .eyebrow { margin: 0 0 8px; color: var(--muted); font: 700 0.64rem system-ui, sans-serif; letter-spacing: 0.15em; text-transform: uppercase; }
+  .consumable-ready strong { display: block; color: var(--gold); font: 700 0.85rem Georgia, serif; }
+  .consumable-ready small { display: block; margin-top: 4px; color: var(--muted); font: 400 0.68rem/1.3 system-ui, sans-serif; }
+  .consumable-ready button { margin-top: 10px; width: 100%; }
+  .empty { color: var(--muted); font: italic 0.78rem Georgia, serif; }
   .numbers { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
   .number, .option { position: relative; min-width: 0; padding: 7px 3px; background: var(--ink); color: var(--cream); border: 1px solid var(--line); border-radius: 4px; font: 700 0.8rem system-ui, sans-serif; cursor: pointer; }
   .number.red, .option.red { background: var(--wine); }
