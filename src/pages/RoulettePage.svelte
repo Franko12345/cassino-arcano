@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ROULETTE_CHIP_OPTIONS, ROULETTE_MAX_ROUNDS, ROULETTE_TARGETS, ACT_COUNT, STARTING_BALANCE, STARTING_LIVES } from '$lib/game/config';
   import { LUCKY_HOUSE_COST, LUCKY_HOUSE_CHANCE } from '$lib/game/config';
-  import { randomNumber, settle, type Bet, type BetType, color, type RouletteColor } from '$lib/game/roulette';
+  import { randomNumber, settle, numberToAngle, type Bet, type BetType, color, type RouletteColor } from '$lib/game/roulette';
   import { applyTalismans, applyModsToBalance, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
   import { SC_REDS } from '$lib/game/roulette-data';
   import RunHud from '$lib/components/RunHud.svelte';
@@ -101,9 +101,8 @@
     notes = [];
     message = 'A órbita está em movimento…';
     const number = randomNumber();
-    const a = new Uint32Array(1);
-    crypto.getRandomValues(a);
-    rotation += 1080 + (a[0]! % 360);
+    const jitter = (crypto.getRandomValues(new Uint32Array(1))[0]! % 100) / 100 * 4 - 2;
+    rotation = 1080 + numberToAngle(number) + jitter;
     setTimeout(() => settle2(number), matchReducedMotion() ? 20 : 2450);
   }
 
