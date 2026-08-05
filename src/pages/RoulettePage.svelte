@@ -28,7 +28,7 @@
   let relics = $state<string[]>([]);
   let consumables = $state<{ luckyHouse: 0 | 1 }>({ luckyHouse: 0 });
   let luckyHouseActive = $state(false);
-  let lastBets: Map<string, Bet> | null = $state(null);
+  let lastBets: Map<string, Bet> | null = $state<Map<string, Bet> | null>(null);
   let streak = $state(0);
   let dozenStreak = $state(0);
   let weightUsed = $state(false);
@@ -45,6 +45,7 @@
 
   let profit = $derived(balance - actStart);
   let total = $derived([...bets.values()].reduce((acc, b) => acc + b.amount, 0));
+  let lastTotal = $derived(lastBets ? [...lastBets.values()].reduce((a, b) => a + b.amount, 0) : 0);
 
   const betKey = (t: string, v: string) => `${t}:${v}`;
   const betsArr = $derived([...bets.values()]);
@@ -78,10 +79,9 @@
 
   function repeatLast() {
     if (!lastBets) return;
-    const total = [...lastBets.values()].reduce((a, b) => a + b.amount, 0);
-    if (balance < total) return;
+    if (balance < lastTotal) return;
     bets = new Map(lastBets);
-    message = `Apostas repetidas: ◆ ${total} no total.`;
+    message = `Apostas repetidas: ◆ ${lastTotal} no total.`;
     tone(550, 0.1, 'sine');
   }
 
@@ -115,7 +115,7 @@
     message = 'A órbita está em movimento…';
     const number = randomNumber();
     const jitter = (crypto.getRandomValues(new Uint32Array(1))[0]! % 100) / 100 * 4 - 2;
-    rotation = 1080 + numberToAngle(number) + jitter;
+    rotation = 1440 + numberToAngle(number) + jitter;
     setTimeout(() => settle2(number), matchReducedMotion() ? 20 : 2450);
   }
 
@@ -317,8 +317,12 @@
     <button
       class="sound-toggle"
       onclick={repeatLast}
-      disabled={!lastBets || balance < (lastBets ? [...lastBets.values()].reduce((a, b) => a + b.amount, 0) : 0) || spinning}
-      title="Repetir última aposta"
+      disabled={!lastBets || spinning || (lastBets && balance < lastTotal)}
+      title={!lastBets
+        ? 'Sem apostas anteriores'
+        : balance < lastTotal
+          ? 'Saldo insuficiente'
+          : 'Repetir última aposta'}
     >↺ Repetir</button>
   </header>
 

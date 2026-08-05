@@ -20,11 +20,11 @@ Três adições à roleta, todas em conformidade com o invariante central: **o s
 
 ### 1. Ponteiro da roda alinhado ao número sorteado
 
-A roda passa a girar para um ângulo calculado a partir do `number` sorteado, não de um aleatório independente. A posição 0° da roda corresponde a uma casa fixa (padrão art déco: começa em zero e avança em ordem cíclica). O ângulo final fica entre 1080° (3 voltas) e 1260° (3.5 voltas) para completar o spin dramático.
+A roda passa a girar para um ângulo calculado a partir do `number` sorteado, não de um aleatório independente. A posição 0° da roda corresponde a uma casa fixa (padrão art déco: começa em zero e avança em ordem cíclica). O ângulo final fica entre 1440° (4 voltas) e 1800° (5 voltas) para completar o spin dramático.
 
 Cada número de 0 a 36 ocupa uma fatia de 360/37 ≈ 9.73°. O ponteiro no topo (`top: -7px`) deve cair **no centro** da fatia do número sorteado. O `randomNumber()` decide o resultado, e o `rotation` é derivado dele.
 
-Cálculo: o ângulo-alvo é `360 - (number / 37) * 360`, com um offset aleatório pequeno (jitter) dentro da fatia para variação visual. O `rotation` final = `1080 + (360 - (number/37)*360) + jitter`.
+Cálculo: o ângulo-alvo é `((37 - number) % 37) * (360/37)`. O `% 37` resolve o caso `number=0` (sem rotação, já está na posição inicial — equivalente à especificação original mas evita uma volta completa desnecessária). Jitter aleatório de ±2° dentro da fatia para variação visual. O `rotation` final = `1440 + ângulo + jitter`.
 
 ### 2. Stack visual de fichas nas casas apostadas
 
