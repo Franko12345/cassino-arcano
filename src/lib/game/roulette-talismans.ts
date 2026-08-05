@@ -18,7 +18,8 @@ export const ROULETTE_CATALOG: readonly TalismanDef[] = [
   { id: 'trio', name: 'Trinca', text: 'Dúzia vencedora: +15.', cost: 45 },
   { id: 'tide', name: 'Maré', text: 'Vitórias seguidas: +8 por sequência.', cost: 55 },
   { id: 'favoriteColor', name: 'Cor Favorita', text: 'Cor apostada vencedora: líquido ×2.', cost: 50 },
-  { id: 'shortBet', name: 'Aposta Curta', text: 'Total apostado ≤ 10: líquido ×1.5.', cost: 35 }
+  { id: 'shortBet', name: 'Aposta Curta', text: 'Total apostado ≤ 10: líquido ×1.5.', cost: 35 },
+  { id: 'parityHot', name: 'Par/Ímpar de Sorte', text: 'Par/ímpar com streak ≥ 3: líquido ×3.', cost: 40 }
 ] as const;
 
 export interface RouletteMods {
@@ -73,6 +74,10 @@ export function applyTalismans(settlement: Settlement, state: { relics: readonly
   if (state.relics.includes('shortBet') && settlement.staked <= 10) {
     mods.multiplier *= 1.5;
     mods.notes.push('Aposta Curta ×1.5');
+  }
+  if (state.relics.includes('parityHot') && state.streak >= 3 && (settlement.types.has('even') || settlement.types.has('odd'))) {
+    mods.multiplier *= 3;
+    mods.notes.push(`Par/Ímpar de Sorte ×3 (streak ${state.streak})`);
   }
   return mods;
 }
