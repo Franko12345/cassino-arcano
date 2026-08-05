@@ -28,6 +28,7 @@
   let relics = $state<string[]>([]);
   let consumables = $state<{ luckyHouse: 0 | 1 }>({ luckyHouse: 0 });
   let luckyHouseActive = $state(false);
+  let lastBets: Map<string, Bet> | null = $state(null);
   let streak = $state(0);
   let dozenStreak = $state(0);
   let weightUsed = $state(false);
@@ -61,6 +62,7 @@
     relics = [];
     consumables = { luckyHouse: 0 };
     luckyHouseActive = false;
+    lastBets = null;
     streak = 0;
     dozenStreak = 0;
     weightUsed = false;
@@ -72,6 +74,15 @@
     resultNumber = null;
     resultColor = null;
     lastResultNumber = null;
+  }
+
+  function repeatLast() {
+    if (!lastBets) return;
+    const total = [...lastBets.values()].reduce((a, b) => a + b.amount, 0);
+    if (balance < total) return;
+    bets = new Map(lastBets);
+    message = `Apostas repetidas: ◆ ${total} no total.`;
+    tone(550, 0.1, 'sine');
   }
 
   function betKeyFor(type: BetType, value: string) { return betKey(type, value); }
@@ -131,6 +142,7 @@
     }
     const { net, extra } = applyModsToBalance(mods, s.net);
     balance += s.returned + bonus + extra;
+    lastBets = bets.size > 0 ? new Map(bets) : lastBets;
     if (wasLucky && s.luckyMultiplier > 1 && s.net > 0) {
       mods.notes.push(`Casa-Sorte ×${s.luckyMultiplier}`);
     }
@@ -302,6 +314,12 @@
       <div class="stat">Giros<strong>{rounds} / {ROULETTE_MAX_ROUNDS}</strong></div>
     </div>
     <button class="sound-toggle" onclick={toggleSound} aria-label="Alternar som">{soundOn ? '♪' : '×'}</button>
+    <button
+      class="sound-toggle"
+      onclick={repeatLast}
+      disabled={!lastBets || balance < (lastBets ? [...lastBets.values()].reduce((a, b) => a + b.amount, 0) : 0) || spinning}
+      title="Repetir última aposta"
+    >↺ Repetir</button>
   </header>
 
   <div class="layout">
