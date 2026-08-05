@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ROULETTE_CHIP_OPTIONS, ROULETTE_MAX_ROUNDS, ROULETTE_TARGETS, ACT_COUNT, STARTING_BALANCE, STARTING_LIVES } from '$lib/game/config';
+  import { LUCKY_HOUSE_COST, LUCKY_HOUSE_CHANCE } from '$lib/game/config';
   import { randomNumber, settle, type Bet, type BetType, color, type RouletteColor } from '$lib/game/roulette';
   import { applyTalismans, applyModsToBalance, ROULETTE_CATALOG } from '$lib/game/roulette-talismans';
   import { SC_REDS } from '$lib/game/roulette-data';
@@ -173,11 +174,6 @@
         return;
       }
       shopOpen = true;
-      // Casa-Sorte aparece com 30% de chance na slot central (só se inventário vazio).
-      if (consumables.luckyHouse === 0 && rollLuckyHouse()) {
-        consumables = { luckyHouse: 1 };
-        message = 'A Casa-Sorte apareceu no seu inventário.';
-      }
       return;
     }
     if (rounds >= ROULETTE_MAX_ROUNDS || balance < 5) {
@@ -247,7 +243,16 @@
   function rollLuckyHouse(): boolean {
     const a = new Uint32Array(1);
     crypto.getRandomValues(a);
-    return a[0]! / 2 ** 32 < 0.3;
+    return a[0]! / 2 ** 32 < LUCKY_HOUSE_CHANCE;
+  }
+
+  function buyLuckyHouse() {
+    if (consumables.luckyHouse === 1) return;
+    if (balance < LUCKY_HOUSE_COST) return;
+    balance -= LUCKY_HOUSE_COST;
+    consumables = { luckyHouse: 1 };
+    message = 'Casa-Sorte comprada. Use antes da próxima rodada.';
+    tone(660, 0.1, 'sine');
   }
 
   function isRed(n: number): boolean { return SC_REDS.has(n); }
@@ -348,7 +353,17 @@
 </main>
 
 {#if shopOpen}
-  <Shop relics={relics} catalog={ROULETTE_CATALOG} onbuy={buyRelic} onskip={skipShop} canafford={(cost: number) => balance >= cost} />
+  <Shop
+    relics={relics}
+    catalog={ROULETTE_CATALOG}
+    consumable={consumables.luckyHouse === 0 && rollLuckyHouse()
+      ? { id: 'luckyHouse', name: 'Casa-Sorte', text: 'Próxima rodada: zero paga ×5 e externas pagam 1:1.', cost: LUCKY_HOUSE_COST }
+      : null}
+    onbuy={buyRelic}
+    onbuyConsumable={buyLuckyHouse}
+    onskip={skipShop}
+    canafford={(cost: number) => balance >= cost}
+  />
 {/if}
 
 {#if endState.visible}
